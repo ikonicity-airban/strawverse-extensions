@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="30%" r="75%" fx="45%" fy="25%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="60%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+
+    <!-- Border Rim Gradient -->
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="45%" stop-color="#818cf8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.7"/>
+    </linearGradient>
+
+    <!-- Stream Cyan/Violet Gradient -->
+    <linearGradient id="streamGrad" x1="15%" y1="15%" x2="90%" y2="85%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+
+    <!-- Download Arrow Gold/Amber Gradient -->
+    <linearGradient id="saveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <!-- Infinity/Omni Loop Gradient -->
+    <linearGradient id="omniGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Filters for Depth and Glow -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="iconShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#38bdf8" flood-opacity="0.25"/>
+    </filter>
+
+    <filter id="innerDepth" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#ffffff" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base Canvas (App Icon Body) -->
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="url(#bgGlow)"/>
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="none" stroke="url(#rimGrad)" stroke-width="4"/>
+
+  <!-- Ambient Light Reflection inside top edge -->
+  <path d="M 50 120 C 100 50, 412 50, 462 120" stroke="white" stroke-width="2" stroke-opacity="0.15" fill="none" stroke-linecap="round"/>
+
+  <!-- Omni / Infinity Abstract Ambient Orbit -->
+  <g filter="url(#softGlow)" opacity="0.6">
+    <ellipse cx="256" cy="256" rx="160" ry="85" transform="rotate(-25 256 256)" 
+             fill="none" stroke="url(#omniGrad)" stroke-width="12" stroke-dasharray="14 10" stroke-linecap="round"/>
+  </g>
+
+  <!-- Central Symbol Group: Integrated Play + Downward Save Stream -->
+  <g filter="url(#iconShadow)">
+    <!-- Play Triangle Foundation with Sleek Rounded Bevels -->
+    <path d="M 188 152 
+             C 188 138, 204 129, 216 137 
+             L 364 233 
+             C 376 241, 376 259, 364 267 
+             L 272 326
+             L 272 260
+             C 272 254, 267 249, 261 249
+             L 188 249
+             Z" 
+          fill="url(#streamGrad)"/>
+
+    <!-- Integrated Downward Download Arrow (OmniSave Core) -->
+    <g transform="translate(0, 0)">
+      <!-- Arrow Shaft / Dynamic Stream Beam -->
+      <path d="M 230 200
+               C 230 193, 236 188, 243 188
+               L 269 188
+               C 276 188, 282 193, 282 200
+               L 282 295
+               L 316 295
+               C 327 295, 332 308, 325 316
+               L 265 382
+               C 260 387, 252 387, 247 382
+               L 187 316
+               C 180 308, 185 295, 196 295
+               L 230 295
+               Z" 
+            fill="url(#saveGrad)" 
+            filter="url(#innerDepth)"/>
+
+      <!-- High-tech Stream Arc / Tray Base (Representing the Storage Vault) -->
+      <path d="M 164 366 
+               C 164 394, 348 394, 348 366" 
+            fill="none" 
+            stroke="url(#streamGrad)" 
+            stroke-width="14" 
+            stroke-linecap="round"/>
+      
+      <!-- Energy Dot Accents -->
+      <circle cx="256" cy="418" r="6" fill="#38bdf8" filter="url(#softGlow)"/>
+      <circle cx="216" cy="416" r="3.5" fill="#818cf8" opacity="0.8"/>
+      <circle cx="296" cy="416" r="3.5" fill="#f59e0b" opacity="0.8"/>
+    </g>
+  </g>
+</svg>

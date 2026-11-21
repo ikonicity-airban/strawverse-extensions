@@ -232,7 +232,7 @@ async function MovieInfo(detailPath) {
                 if (maxEp > 0) {
                     for (let ep = 1; ep <= maxEp; ep++) {
                         episodes.push({
-                            id: `${subjectId}:${detailPath}:${se}:${ep}`,
+                            id: `tv:${subjectId}:${detailPath}:${se}:${ep}`,
                             number: ep,
                             episode: ep,
                             season: se,
@@ -241,7 +241,7 @@ async function MovieInfo(detailPath) {
                     }
                 } else {
                     episodes.push({
-                        id: `${subjectId}:${detailPath}:${se}:0`,
+                        id: `tv:${subjectId}:${detailPath}:${se}:1`,
                         number: 1,
                         episode: 1,
                         season: se,
@@ -298,7 +298,12 @@ async function fetchMovieSources(combinedId) {
     }
 
     try {
-        const parts = combinedId.split(":");
+        const cleanId = combinedId.startsWith("tv:")
+            ? combinedId.slice(3)
+            : combinedId.startsWith("movie:")
+                ? combinedId.slice(6)
+                : combinedId;
+        const parts = cleanId.split(":");
         const subjectId = parts[0] || "";
         const detailPath = parts[1] || "";
         const se = parts[2] || "0";
@@ -408,7 +413,7 @@ async function latestMovies(filters = {}) {
 
 module.exports = {
     name: "omnisave",
-    version: "1.0.2",
+    version: "1.0.3",
     baseUrl: BASE_SITE,
 
     // Declarative header rules for streaming playback in MPV / StrawVerse
