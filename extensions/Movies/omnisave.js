@@ -4,15 +4,22 @@
  *
  * Scrapes and streams movies and TV series from OmniSave (videodownloader.site).
  * Fully compliant with StrawVerse Extension Specification.
+ * Features automated dynamic guest session token rotation to ensure consistent 720p quality.
  */
+
+const https = require("https");
 
 const BASE_API = "https://h5-api.aoneroom.com";
 const BASE_SITE = "https://videodownloader.site";
 
-// Permanent valid guest JWT session token (ensures 100% reliable auth inside Electron adapters)
-const DEFAULT_GUEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjI2MzMzMjY4MzI1NTY4NjA1MTIsImF0cCI6MywiZXh0IjoiMTc5NTI0MzE2OCIsImV4cCI6MTgwMzAxOTE2OCwiaWF0IjoxNzk1MjQyODY4fQ.Ra676cOMZd-8gkccujFOwL8FMOrDKnt2JAVkWOjX7JQ";
+// Permanent valid fallback guest token in case of offline/network issues
+const DEFAULT_GUEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjM5NjU2MzM2NTkyMzU0NjE3NDQsImF0cCI6MywiZXh0IjoiMTc5NTI0OTgwMyIsImV4cCI6MTgwMzAyNTgwMywiaWF0IjoxNzk1MjQ5NTAzfQ.t6HpRO1l5akjLp2ReRtfg6fftMbLLhmpC5snpTu6jmE";
 
-let cachedToken = DEFAULT_GUEST_TOKEN;
+let currentToken = null;
+let tokenCreatedAt = 0;
+let tokenUsageCount = 0;
+const MAX_USAGE_PER_TOKEN = 3; // Rotate every 3 queries to keep 720p quota fresh
+const TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL
 
 const defaultHeaders = {
     "X-Source": "downloader",
@@ -22,6 +29,74 @@ const defaultHeaders = {
     "Referer": `${BASE_SITE}/`,
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 };
+
+/**
+ * Request a brand-new dynamic guest session token directly via native HTTPS.
+ * OmniSave generates a new guest user ID and fresh quota on each call to /country-code.
+ */
+function requestNewGuestToken() {
+    return new Promise((resolve) => {
+        const randId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        const req = https.request({
+            hostname: "h5-api.aoneroom.com",
+            port: 443,
+            path: "/wefeed-h5api-bff/country-code",
+            method: "GET",
+            headers: {
+                ...defaultHeaders,
+                "x-client-trace-id": randId
+            },
+            timeout: 8000
+        }, (res) => {
+            let data = "";
+            res.on("data", chunk => data += chunk);
+            res.on("end", () => {
+                const rawUser = res.headers["x-user"];
+                if (rawUser) {
+                    try {
+                        const parsed = typeof rawUser === "string" ? JSON.parse(rawUser) : rawUser;
+                        if (parsed?.token) {
+                            return resolve(parsed.token);
+                        }
+                    } catch (_) {}
+                }
+                const setCookie = res.headers["set-cookie"];
+                if (setCookie) {
+                    for (const c of setCookie) {
+                        const match = c.match(/token=([^;]+)/);
+                        if (match) return resolve(match[1]);
+                    }
+                }
+                resolve(DEFAULT_GUEST_TOKEN);
+            });
+        });
+
+        req.on("error", () => resolve(DEFAULT_GUEST_TOKEN));
+        req.on("timeout", () => {
+            req.destroy();
+            resolve(DEFAULT_GUEST_TOKEN);
+        });
+        req.end();
+    });
+}
+
+/**
+ * Obtain a valid guest token with automatic rotation.
+ * @param {boolean} forceRefresh If true, immediately mints a brand-new token.
+ */
+async function getAuthToken(forceRefresh = false) {
+    const now = Date.now();
+    const isExpired = !currentToken || (now - tokenCreatedAt > TOKEN_TTL_MS) || (tokenUsageCount >= MAX_USAGE_PER_TOKEN);
+
+    if (forceRefresh || isExpired) {
+        currentToken = await requestNewGuestToken();
+        tokenCreatedAt = Date.now();
+        tokenUsageCount = 0;
+    }
+
+    tokenUsageCount++;
+    return currentToken;
+}
 
 /**
  * Universal request wrapper with retry logic
@@ -72,35 +147,6 @@ async function httpRequest(url, options = {}, retries = 3) {
         }
         throw err;
     }
-}
-
-/**
- * Obtain or reuse a valid guest JWT session token.
- */
-async function getAuthToken() {
-    if (cachedToken) {
-        return cachedToken;
-    }
-
-    try {
-        const res = await httpRequest(`${BASE_API}/wefeed-h5api-bff/country-code`, {
-            method: "GET",
-            headers: defaultHeaders,
-            timeout: 8000
-        });
-
-        const rawUser = res.headers?.["x-user"] || (typeof res.headers?.get === "function" ? res.headers.get("x-user") : null);
-        if (rawUser) {
-            const parsed = typeof rawUser === "string" ? JSON.parse(rawUser) : rawUser;
-            if (parsed?.token) {
-                cachedToken = parsed.token;
-                return cachedToken;
-            }
-        }
-    } catch (_) {}
-
-    cachedToken = DEFAULT_GUEST_TOKEN;
-    return cachedToken;
 }
 
 /**
@@ -243,7 +289,7 @@ async function MovieInfo(detailPath) {
 }
 
 /**
- * Fetch video stream sources and subtitles.
+ * Fetch video stream sources and subtitles with dynamic token refresh for high-definition 720p streams.
  * @param {string} combinedId Encoded as "subjectId:detailPath:season:episode"
  */
 async function fetchMovieSources(combinedId) {
@@ -258,10 +304,11 @@ async function fetchMovieSources(combinedId) {
         const se = parts[2] || "0";
         const ep = parts[3] || "0";
 
-        const token = await getAuthToken();
+        // Always request with a freshly minted token to ensure full 720p bandwidth/quota
+        let token = await getAuthToken(true);
         const url = `${BASE_API}/wefeed-h5api-bff/subject/download?subjectId=${subjectId}&se=${se}&ep=${ep}&detailPath=${encodeURIComponent(detailPath)}&supportCodecs%5Bh264%5D=1`;
 
-        const res = await httpRequest(url, {
+        let res = await httpRequest(url, {
             method: "GET",
             headers: {
                 ...defaultHeaders,
@@ -270,12 +317,32 @@ async function fetchMovieSources(combinedId) {
             timeout: 15000
         });
 
-        const data = res.data?.data || {};
-        const downloads = Array.isArray(data.downloads) ? data.downloads : [];
+        let data = res.data?.data || {};
+        let downloads = Array.isArray(data.downloads) ? data.downloads : [];
+
+        // Check if 720p or higher is available. If throttled to 480p, force-mint another token once and retry!
+        const hasHighRes = downloads.some(d => !d.vipLocked && Number(d.resolution) >= 720);
+        if (!hasHighRes && downloads.length > 0) {
+            console.log("[OmniSave] 720p throttled on current session. Minting fresh token and retrying source fetch...");
+            token = await getAuthToken(true);
+            res = await httpRequest(url, {
+                method: "GET",
+                headers: {
+                    ...defaultHeaders,
+                    "Authorization": `Bearer ${token}`
+                },
+                timeout: 15000
+            });
+            data = res.data?.data || {};
+            downloads = Array.isArray(data.downloads) ? data.downloads : downloads;
+        }
+
         const captions = Array.isArray(data.captions) ? data.captions : [];
 
+        // Sort descending by resolution so 720p is always picked first as Server #1
         const sources = downloads
             .filter(d => d.url && !d.vipLocked)
+            .sort((a, b) => (Number(b.resolution) || 0) - (Number(a.resolution) || 0))
             .map(d => ({
                 url: d.url,
                 quality: d.resolution ? `${d.resolution}p` : "HD",
@@ -341,7 +408,7 @@ async function latestMovies(filters = {}) {
 
 module.exports = {
     name: "omnisave",
-    version: "1.0.1",
+    version: "1.0.2",
     baseUrl: BASE_SITE,
 
     // Declarative header rules for streaming playback in MPV / StrawVerse
