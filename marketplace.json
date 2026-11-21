@@ -2,7 +2,7 @@
   "movies-tvshows": [
     {
       "name": "omnisave",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "MinAppVersion": "11.1.0",
       "disabled": false
     }
@@ -10,7 +10,7 @@
   "Movies": [
     {
       "name": "omnisave",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "MinAppVersion": "11.1.0",
       "disabled": false
     }
@@ -18,7 +18,7 @@
   "Anime": [
     {
       "name": "omnisave",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "MinAppVersion": "11.1.0",
       "disabled": false
     }
