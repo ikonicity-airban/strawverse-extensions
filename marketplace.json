@@ -5,6 +5,12 @@
       "version": "1.0.2",
       "MinAppVersion": "11.1.0",
       "disabled": false
+    },
+    {
+      "name": "youtube",
+      "version": "1.0.0",
+      "MinAppVersion": "11.1.0",
+      "disabled": false
     }
   ],
   "Movies": [
@@ -13,12 +19,24 @@
       "version": "1.0.2",
       "MinAppVersion": "11.1.0",
       "disabled": false
+    },
+    {
+      "name": "youtube",
+      "version": "1.0.0",
+      "MinAppVersion": "11.1.0",
+      "disabled": false
     }
   ],
   "Anime": [
     {
       "name": "omnisave",
       "version": "1.0.2",
+      "MinAppVersion": "11.1.0",
+      "disabled": false
+    },
+    {
+      "name": "youtube",
+      "version": "1.0.0",
       "MinAppVersion": "11.1.0",
       "disabled": false
     }

@@ -1,61 +1,36 @@
-# StrawVerse OmniSave Movies & TV Shows Extension
+# Airban's StrawVerse Extensions Repository
 
-A high-performance **StrawVerse** provider extension that indexes, streams, and batch-downloads movies and TV series from OmniSave (`videodownloader.site`).
-
----
-
-## 🌟 Features
-
-- **Movies & TV Series Support:** Full support for both standalone movies (with single-click resolution choice) and episodic series (with seasons and episode selectors).
-- **Multiple Qualities:** Streams and downloads MP4 video files in 360p, 480p, and 720p HD.
-- **Multilingual Subtitles:** Automatically extracts official subtitle tracks (`.srt`) in English, Spanish, French, Arabic, and more.
-- **Direct High-Speed CDN:** Plays directly from fast CloudFront / Alibaba Cloud OSS nodes via StrawVerse's native MPV player and download manager.
-- **Universal Compatibility:** Compatible with StrawVerse's **Movies & TV Shows** tab as well as the standard **Anime** scraper engine.
+Official extension collection for [StrawVerse](https://github.com). This multi-extension repository allows you to search, stream, and download movies, TV shows, and online video courses/playlists in high quality directly within StrawVerse.
 
 ---
 
-## 📁 Repository Structure
+## 📦 Included Extensions
 
-```
-omnisave-strawverse-extension/
-├── marketplace.json                      # StrawVerse extension registry manifest
-├── extensions/
-│   ├── movies-tvshows/
-│   │   └── omnisave.js                  # Primary Movies & TV Shows scraper
-│   ├── Movies/
-│   │   └── omnisave.js                  # Direct Movies fallback path
-│   └── Anime/
-│       └── omnisave.js                  # Anime engine compatibility alias
-├── ico/
-│   └── omnisave.ico                     # Scraper favicon/icon
-└── README.md
-```
+### 1. 🎬 OmniSave (`omnisave`)
+- **Category:** Movies & TV Shows
+- **Features:** 
+  - Streams & downloads theatrical movies and episodic TV series from OmniSave (`videodownloader.site`).
+  - Automatic dynamic guest token rotation ensuring consistent **720p HD** quality.
+  - Multi-language subtitles support.
+
+### 2. 📺 YouTube Videos, Playlists & Courses (`youtube`)
+- **Category:** Movies & TV Shows / Education
+- **Features:**
+  - Converts any YouTube playlist or course into an organized Series with numbered lectures.
+  - Search by topic or paste direct YouTube video and playlist links.
+  - Fast, direct **720p MP4** streaming and batch downloads with embedded audio.
+  - Optimized for StrawVerse's integrated VLC media player.
 
 ---
 
 ## 🚀 How to Add This Repository to StrawVerse
 
-### Method 1: Host on GitHub (Recommended for community/sync)
-1. Push this folder to your GitHub account:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial OmniSave StrawVerse extension"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/omnisave-strawverse-extension.git
-   git push -u origin main
+1. Open **StrawVerse**.
+2. Click **Settings** (gear icon) → Navigate to **Extensions** / **Marketplace**.
+3. In the top bar, click **+ Add Repo**.
+4. Enter this GitHub URL:
    ```
-2. In StrawVerse:
-   - Go to **Settings** → **Extensions** (Marketplace).
-   - Click **+ Add Repo** in the top bar.
-   - Paste your GitHub URL: `https://github.com/<your-username>/omnisave-strawverse-extension`.
-   - Click **Add Repository**.
-   - OmniSave will appear under **Movies & TV Shows** and **Anime**. Click **Install Scraper**!
-
-### Method 2: Instant Local Installation (Already Deployed!)
-The extension has already been pre-installed directly into your local StrawVerse installation at:
-* `%APPDATA%\strawverse\scrapers\movies-tvshows\omnisave.js`
-* `%APPDATA%\strawverse\scrapers\Anime\omnisave.js`
-* `%APPDATA%\strawverse\scrapers\icons\omnisave.ico`
-
-Simply open or restart **StrawVerse**, navigate to **Settings** → **Scraper Providers**, and select **omnisave** as your active provider for Movies & TV Shows!
+   https://github.com/ikonicity-airban/strawverse-extensions
+   ```
+5. Click **Add Repository**.
+6. You will now see both **OmniSave** and **YouTube** ready for installation!
